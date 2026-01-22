@@ -1,21 +1,71 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Twoje kolory bazowe */
+  --background: #1f2a14;
+  --foreground: #f4ffd9;
+
+  /* Kolor akcentowy (np. do ramek/linii) - 15% przezroczystości foreground */
+  --accent: rgba(244, 255, 217, 0.15);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Ustawienia ogólne HTML */
+html {
+  scroll-behavior: smooth;
 }
 
+/* Style bazowe Body */
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family:
+    Arial, Helvetica, sans-serif; /* Tu docelowo warto wpiąć ładniejszy font */
+
+  /* Antialiasing - kluczowe dla cienkiego tekstu na ciemnym tle */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* PREMIUM SCROLLBAR */
+/* Zastępuje domyślny systemowy pasek */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--foreground);
+  border: 3px solid var(--background); /* Margines (border hack) */
+  border-radius: 9999px;
+  opacity: 0.8;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #e2ecc9;
+}
+
+/* SELECTION - Odwrócone kolory przy zaznaczaniu tekstu */
+::selection {
+  background-color: var(--foreground);
+  color: var(--background);
+}
+
+/* FOCUS - Elegancki outline zamiast domyślnego niebieskiego */
+:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 4px;
+}
+
+/* UTILITIES (Opcjonalne klasy pomocnicze) */
+@layer utilities {
+  /* Klasa do szybkiego centrowania absolutnego */
+  .absolute-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
 }
