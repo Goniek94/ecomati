@@ -3,11 +3,28 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ShoppingBag } from "lucide-react";
-import Link from "next/link"; // Używamy Link zamiast window.location
-import { Product } from "./Products"; // Importujemy typ z pliku danych
+import Link from "next/link";
+import { Product } from "./Products";
+import { useCart } from "@/context/CartContext"; // <--- IMPORT
+import { useToast } from "@/context/ToastContext"; // <--- IMPORT
 
 export default function ProductCard({ product }: { product: Product }) {
   const [isHovered, setIsHovered] = useState(false);
+  const { addToCart } = useCart(); // <--- Pobieramy funkcję
+  const { showToast } = useToast(); // <--- Pobieramy toasta
+
+  // Funkcja szybkiego dodawania
+  const handleQuickAdd = (e: React.MouseEvent) => {
+    e.preventDefault(); // Nie wchodzimy w szczegóły
+    e.stopPropagation();
+
+    // Jeśli produkt ma rozmiary, bierzemy pierwszy, jeśli nie - "Standard"
+    const defaultSize =
+      product.sizes && product.sizes.length > 0 ? product.sizes[0] : "Standard";
+
+    addToCart(product, defaultSize, 1);
+    showToast(`Dodano do koszyka: ${product.name}`);
+  };
 
   return (
     <motion.div
@@ -27,9 +44,6 @@ export default function ProductCard({ product }: { product: Product }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* CAŁA KARTA JEST LINKIEM 
-        (ale musimy uważać na przycisk koszyka w środku) 
-      */}
       <Link href={`/sklep/${product.id}`} className="flex flex-col h-full">
         {/* ZDJĘCIE */}
         <div className="relative w-full aspect-[4/5] overflow-hidden bg-[#F6F5EE] border-b border-[#1F2A14]/10">
@@ -61,7 +75,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </div>
       </Link>
 
-      {/* BUTTONY (Wyciągnięte poza Link lub zablokowana propagacja) */}
+      {/* BUTTONY */}
       <div className="grid grid-cols-[1fr_60px] border-t border-[#1F2A14]/15 bg-white relative z-10">
         <Link
           href={`/sklep/${product.id}`}
@@ -71,13 +85,8 @@ export default function ProductCard({ product }: { product: Product }) {
         </Link>
 
         <button
-          className="flex items-center justify-center border-l border-[#1F2A14]/15 text-[#1F2A14] hover:bg-[#FFD966] transition-colors duration-300 z-20"
-          onClick={(e) => {
-            e.preventDefault(); // Zapobiega przejściu na stronę produktu przy kliknięciu w koszyk
-            e.stopPropagation();
-            console.log("Dodano do koszyka");
-            // Tutaj dodasz logikę koszyka
-          }}
+          className="flex items-center justify-center border-l border-[#1F2A14]/15 text-[#1F2A14] hover:bg-[#FFD966] transition-colors duration-300 z-20 cursor-pointer" // cursor-pointer
+          onClick={handleQuickAdd} // <--- PODPIĘTE SZYBKIE DODAWANIE
         >
           <ShoppingBag size={18} strokeWidth={2} />
         </button>
