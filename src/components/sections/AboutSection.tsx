@@ -1,250 +1,241 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowUpRight, Leaf, ShieldCheck, Award, Users } from "lucide-react";
 
-// --- DANE SLAJDÓW ---
-const slides = [
+// DANE DO SLAJDÓW
+const SLIDES = [
   {
-    id: 0,
-    tabLabel: "01. O NAS",
-    title: "Czysta energia",
-    subtitle: "Zrodzona z natury",
-    // Treść jest komponentem, żeby zachować czystość
-    content: (
-      <div className="space-y-8">
-        <p className="text-lg md:text-xl leading-relaxed text-[#D6DCC2] max-w-2xl">
-          ECOMATI to powrót do korzeni. W świecie pełnym sztucznych ulepszaczy,
-          my wybieramy drogę bez skrótów. Wierzymy, że natura nie potrzebuje
-          poprawek, dlatego nasze produkty są surowe, nieprzetworzone i pełne
-          pierwotnej wartości.
-        </p>
-        <div className="grid grid-cols-2 gap-4 max-w-md">
-          <div className="bg-[#F4FFD9]/5 p-6 border border-[#F4FFD9]/10">
-            <span className="block text-3xl font-serif text-[#FFD966] mb-1">
-              100%
-            </span>
-            <span className="text-[10px] uppercase tracking-widest text-[#F4FFD9]/60">
-              Natura
-            </span>
-          </div>
-          <div className="bg-[#F4FFD9]/5 p-6 border border-[#F4FFD9]/10">
-            <span className="block text-3xl font-serif text-[#FFD966] mb-1">
-              2024
-            </span>
-            <span className="text-[10px] uppercase tracking-widest text-[#F4FFD9]/60">
-              Założona
-            </span>
-          </div>
-        </div>
-      </div>
+    id: "filozofia",
+    label: "Filozofia Marki",
+    title: (
+      <>
+        Natura nie <br />
+        <span className="italic text-[#6B705C]">potrzebuje</span> <br />
+        poprawek.
+      </>
     ),
+    description: (
+      <>
+        <p className="mb-6">
+          W Ecomati wierzymy w surową siłę prostoty. Nasze oleje nie leżą w
+          magazynach miesiącami. Są tłoczone na moment przed tym, jak trafią w
+          Twoje ręce.
+        </p>
+        <p>
+          To nie jest masowa produkcja. To rzemiosło, w którym każda kropla ma
+          znaczenie.
+        </p>
+      </>
+    ),
+    image: "/Img/Olejbio.png", // Butelka
+    badge: { val: "100%", text: "ORGANIC" },
   },
   {
-    id: 1,
-    tabLabel: "02. NASZA MISJA",
-    title: "Bez kompromisów",
-    subtitle: "Proces produkcji",
-    content: (
-      <div className="space-y-8">
-        <p className="text-lg text-[#D6DCC2] max-w-2xl">
-          Nasz proces jest prosty, ale rygorystyczny. Selekcjonujemy ziarna z
-          certyfikowanych upraw, tłoczymy je w niskiej temperaturze i
-          natychmiast butelkujemy, by zamknąć w środku świeżość.
-        </p>
-        <ul className="space-y-5">
-          {[
-            { icon: Leaf, text: "Organiczne, certyfikowane uprawy" },
-            { icon: ShieldCheck, text: "Tłoczenie na zimno (poniżej 40°C)" },
-            { icon: Award, text: "Brak konserwantów i filtracji chemicznej" },
-          ].map((item, i) => (
-            <li
-              key={i}
-              className="flex items-center gap-4 text-[#F4FFD9] group"
-            >
-              <div className="w-10 h-10 rounded-full bg-[#FFD966]/10 flex items-center justify-center text-[#FFD966] group-hover:bg-[#FFD966] group-hover:text-[#1F2A14] transition-colors duration-300">
-                <item.icon size={18} />
-              </div>
-              <span className="text-sm font-bold uppercase tracking-widest opacity-80 group-hover:opacity-100 transition-opacity">
-                {item.text}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+    id: "misja",
+    label: "Nasza Misja",
+    title: (
+      <>
+        Zdrowie <br />
+        zamknięte w <br />
+        <span className="italic text-[#FFD966]">kropli.</span>
+      </>
     ),
+    description: (
+      <>
+        <p className="mb-6">
+          Naszym celem jest przywrócenie stołom prawdziwego smaku i wartości
+          odżywczych, które giną w przemysłowym przetwórstwie.
+        </p>
+        <p>
+          Chcemy, abyś wiedział dokładnie, skąd pochodzi Twoje jedzenie.
+          Transparentność to nasza waluta.
+        </p>
+      </>
+    ),
+    image: "/Img/Dynia.png", // Dynia pasuje do "ziemi/zdrowia"
+    badge: { val: "RAW", text: "VEGAN" },
   },
   {
-    id: 2,
-    tabLabel: "03. PARTNERZY",
-    title: "Zaufali nam",
-    subtitle: "Jakość potwierdzona",
-    content: (
-      <div className="w-full h-full flex flex-col justify-between">
-        <p className="text-lg text-[#D6DCC2] mb-8 max-w-2xl">
-          Współpracujemy tylko z tymi, którzy podzielają nasze wartości. Oto
-          nasi certyfikowani dostawcy oraz partnerzy technologiczni, dzięki
-          którym jakość ECOMATI jest niezmienna.
-        </p>
-
-        {/* GRID LOGOTYPÓW - Wygląda zawsze tak samo równo */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {[
-            "GREEN FIELD",
-            "BIO PRESS",
-            "PURE SEEDS",
-            "ORGANIC ALLIANCE",
-            "ECO CERT",
-            "NATURE VIBE",
-          ].map((partner, i) => (
-            <div
-              key={i}
-              className="
-                h-20 
-                border border-[#F4FFD9]/10 
-                bg-[#F4FFD9]/5 
-                flex items-center justify-center 
-                hover:bg-[#F4FFD9]/10 hover:border-[#F4FFD9]/20 
-                transition-all duration-300 cursor-default group
-              "
-            >
-              <span className="font-serif italic text-[#F4FFD9]/30 group-hover:text-[#FFD966] transition-colors font-bold text-sm md:text-base">
-                {partner}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
+    id: "partnerzy",
+    label: "Zaufani Partnerzy",
+    title: (
+      <>
+        Wspieramy <br />
+        Lokalnych <br />
+        <span className="italic text-[#A4C2A5]">Rolników.</span>
+      </>
     ),
+    description: (
+      <>
+        <p className="mb-6">
+          Współpracujemy tylko z certyfikowanymi dostawcami, których znamy
+          osobiście. Od nasiona do butelki – kontrolujemy każdy etap.
+        </p>
+        <p>
+          Dzięki temu wspieramy lokalne rolnictwo i skracamy łańcuch dostaw do
+          absolutnego minimum.
+        </p>
+      </>
+    ),
+    image: "/Img/Migdały.png", // Migdały pasują do "surowca/rolników"
+    badge: { val: "FAIR", text: "TRADE" },
   },
 ];
 
 export default function AboutSlider() {
-  const [activeTab, setActiveTab] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Auto-play: Zmiana co 5 sekund
+  // Automatyczna zmiana slajdów co 6 sekund
   useEffect(() => {
-    if (isPaused) return;
-    const interval = setInterval(() => {
-      setActiveTab((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [isPaused]);
+    const timer = setInterval(() => {
+      nextSlide();
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [currentIndex]);
+
+  const nextSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % SLIDES.length);
+  };
+
+  const setSlide = (index: number) => {
+    setCurrentIndex(index);
+  };
+
+  const currentSlide = SLIDES[currentIndex];
 
   return (
-    <section className="relative bg-[#1F2A14] text-[#F4FFD9] py-32 overflow-hidden border-t border-[#F4FFD9]/5">
-      {/* TŁO DEKORACYJNE */}
-      <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-[#253218] to-transparent pointer-events-none opacity-40" />
+    <section
+      id="about"
+      className="relative w-full min-h-[110vh] bg-[#1F2A14] text-[#F6F5EE] overflow-hidden py-20 flex flex-col justify-center"
+    >
+      {/* --- TŁO STATYCZNE (Liście) --- */}
+      <div className="absolute top-0 right-0 w-[70%] h-full opacity-10 pointer-events-none mix-blend-soft-light">
+        <Image
+          src="/Img/leaves-4337542_1280.jpg"
+          alt="Leaves texture"
+          fill
+          className="object-cover"
+        />
+      </div>
 
-      <div className="max-w-[1600px] mx-auto px-6 md:px-12 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
-          {/* --- KOLUMNA 1: NAWIGACJA (LEWA) --- */}
-          <div className="lg:col-span-4 flex flex-col justify-center space-y-4">
-            {slides.map((slide, index) => {
-              const isActive = activeTab === index;
-              return (
-                <button
-                  key={slide.id}
-                  onClick={() => setActiveTab(index)}
-                  onMouseEnter={() => setIsPaused(true)}
-                  onMouseLeave={() => setIsPaused(false)}
-                  className={`
-                    relative group w-full text-left p-6 transition-all duration-500 border border-transparent
-                    ${isActive ? "bg-[#F4FFD9]/5 border-[#F4FFD9]/10" : "hover:bg-[#F4FFD9]/5 opacity-60 hover:opacity-100"}
-                  `}
-                >
-                  {/* TEKST PRZYCISKU */}
-                  <div className="flex justify-between items-center relative z-10">
-                    <span
-                      className={`text-sm font-bold tracking-[0.25em] uppercase transition-colors ${isActive ? "text-[#FFD966]" : "text-[#F4FFD9]"}`}
-                    >
-                      {slide.tabLabel}
-                    </span>
-                    {isActive && (
-                      <ArrowUpRight size={16} className="text-[#FFD966]" />
-                    )}
-                  </div>
+      <div className="max-w-[1700px] mx-auto px-6 md:px-12 relative z-10 w-full">
+        {/* --- PRZEŁĄCZNIK GÓRNY (Filozofia / Misja / Partnerzy) --- */}
+        <div className="flex flex-wrap gap-8 mb-16 border-b border-[#F6F5EE]/10 pb-6">
+          {SLIDES.map((slide, idx) => (
+            <button
+              key={slide.id}
+              onClick={() => setSlide(idx)}
+              className={`text-sm tracking-[0.25em] uppercase transition-all duration-500 ${
+                idx === currentIndex
+                  ? "text-[#FFD966] font-bold"
+                  : "text-[#F6F5EE]/40 hover:text-[#F6F5EE]/80"
+              }`}
+            >
+              0{idx + 1}. {slide.label}
+            </button>
+          ))}
+        </div>
 
-                  {/* PASEK CZASU (Timer) - Tylko dla aktywnego */}
-                  {isActive && !isPaused && (
-                    <motion.div
-                      layoutId="timer"
-                      initial={{ width: "0%" }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 5, ease: "linear" }}
-                      className="absolute bottom-0 left-0 h-[2px] bg-[#FFD966] w-full z-20"
-                    />
-                  )}
-                  {/* Tło paska czasu (szare) */}
-                  {isActive && (
-                    <div className="absolute bottom-0 left-0 h-[2px] bg-[#F4FFD9]/10 w-full z-10" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* --- KOLUMNA 2: TREŚĆ (PRAWA) - FIXED HEIGHT CONTAINER --- */}
+        <AnimatePresence mode="wait">
           <div
-            className="lg:col-span-8 relative h-[600px] border border-[#F4FFD9]/5 bg-[#1F2A14]/50 backdrop-blur-sm overflow-hidden"
-            onMouseEnter={() => setIsPaused(true)}
-            onMouseLeave={() => setIsPaused(false)}
+            key={currentSlide.id}
+            className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center"
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-                className="absolute inset-0 p-8 md:p-16 flex flex-col justify-center"
-              >
-                {/* HEADER TREŚCI */}
-                <div className="mb-10">
-                  <motion.h4
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 }}
-                    className="text-lg md:text-2xl font-serif italic text-[#FFD966] opacity-90 mb-2"
-                  >
-                    {slides[activeTab].subtitle}
-                  </motion.h4>
+            {/* LEWA STRONA: TREŚĆ */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="lg:col-span-6 flex flex-col gap-8"
+            >
+              <div className="flex items-center gap-4 text-[#FFD966]">
+                <span className="h-[1px] w-12 bg-[#FFD966]"></span>
+                <span className="text-xs font-bold tracking-[0.3em] uppercase">
+                  {currentSlide.label}
+                </span>
+              </div>
 
-                  <motion.h3
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-[clamp(2.5rem,4vw,4rem)] font-serif text-[#F4FFD9] leading-none uppercase tracking-tight"
-                  >
-                    {slides[activeTab].title}
-                  </motion.h3>
-                </div>
+              <h2 className="text-5xl md:text-7xl xl:text-8xl font-serif leading-[0.95]">
+                {currentSlide.title}
+              </h2>
 
-                {/* GŁÓWNA TREŚĆ (Dynamiczna) */}
+              <div className="max-w-xl mt-4 text-lg md:text-xl font-light leading-relaxed text-[#F6F5EE]/80">
+                {currentSlide.description}
+              </div>
+
+              {/* Przycisk CTA */}
+              <div className="mt-8">
+                <button className="group relative px-8 py-4 border border-[#F6F5EE]/30 rounded-full overflow-hidden hover:border-[#FFD966] transition-colors duration-300">
+                  <span className="relative z-10 text-sm tracking-widest font-semibold group-hover:text-[#1F2A14] transition-colors duration-300">
+                    WIĘCEJ O NAS
+                  </span>
+                  <div className="absolute inset-0 bg-[#FFD966] translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                </button>
+              </div>
+            </motion.div>
+
+            {/* PRAWA STRONA: ZDJĘCIE */}
+            <div className="lg:col-span-6 relative h-[500px] md:h-[600px] flex items-center justify-center">
+              {/* Dekoracyjne okręgi (Stałe) */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="border-t border-[#F4FFD9]/10 pt-8 flex-grow"
-                >
-                  {slides[activeTab].content}
-                </motion.div>
+                  animate={{ rotate: 360 }}
+                  transition={{
+                    duration: 40,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
+                  className="w-[350px] h-[350px] md:w-[500px] md:h-[500px] border border-[#F6F5EE]/5 rounded-full border-dashed"
+                />
+              </div>
 
-                {/* LINK NA DOLE (Zawsze w tym samym miejscu) */}
-                <div className="mt-auto pt-8 flex justify-end">
-                  <a
-                    href="/o-nas"
-                    className="group flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] text-[#F4FFD9] hover:text-[#FFD966] transition-colors"
-                  >
-                    Dowiedz się więcej
-                    <div className="w-8 h-px bg-[#F4FFD9]/30 group-hover:bg-[#FFD966] transition-colors" />
-                  </a>
-                </div>
+              {/* Główne zdjęcie (Animowane przy zmianie slajdu) */}
+              <motion.div
+                key={currentSlide.image} // Klucz wymusza re-render animacji
+                initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
+                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                exit={{ opacity: 0, scale: 1.1, rotate: 5 }}
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="relative z-10 w-[280px] md:w-[450px] drop-shadow-2xl"
+              >
+                <Image
+                  src={currentSlide.image}
+                  alt={currentSlide.label}
+                  width={600}
+                  height={600}
+                  className="object-contain"
+                />
               </motion.div>
-            </AnimatePresence>
+
+              {/* Pływający Badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="absolute bottom-10 right-0 md:right-20 bg-[#F6F5EE] text-[#1F2A14] p-4 md:p-6 backdrop-blur-sm bg-opacity-95"
+              >
+                <h4 className="font-serif text-2xl md:text-3xl mb-1">
+                  {currentSlide.badge.val}
+                </h4>
+                <p className="text-[10px] uppercase tracking-widest font-bold opacity-60">
+                  {currentSlide.badge.text}
+                </p>
+              </motion.div>
+            </div>
           </div>
+        </AnimatePresence>
+
+        {/* Pasek postępu slajdów na dole */}
+        <div className="flex gap-2 mt-12 md:mt-0">
+          {SLIDES.map((_, idx) => (
+            <div
+              key={idx}
+              className={`h-1 transition-all duration-500 ${idx === currentIndex ? "w-12 bg-[#FFD966]" : "w-4 bg-[#F6F5EE]/20"}`}
+            />
+          ))}
         </div>
       </div>
     </section>

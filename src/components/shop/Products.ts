@@ -1,6 +1,20 @@
-import { Product } from "./ProductCard";
+export interface Product {
+  id: number;
+  name: string;
+  desc: string;
+  price: string;
+  image: string;
+  category: string;
+  featured?: boolean;
+  longDesc?: string;
+  application?: string;
+  ingredients?: string;
+  details?: string;
+  // --- NOWE POLE ---
+  sizes?: string[];
+}
 
-export const products: Product[] = [
+const baseProducts: Product[] = [
   {
     id: 1,
     name: "Olej lniany BIO",
@@ -9,6 +23,13 @@ export const products: Product[] = [
     image: "/Img/Olejbio.png",
     category: "oleje",
     featured: true,
+    longDesc:
+      "Nasz olej lniany to esencja zdrowia zamknięta w ciemnym szkle. Tłoczony metodą 'na zimno'.",
+    application: "Spożywać na zimno. Doskonały do sałatek.",
+    ingredients: "100% olej z nasion lnu brązowego.",
+    details: "Butelka: Ciemne szkło UV • Kraj: Polska",
+    // Dodajemy warianty
+    sizes: ["250 ml", "500 ml", "1000 ml"],
   },
   {
     id: 2,
@@ -17,6 +38,7 @@ export const products: Product[] = [
     price: "19,90 zł",
     image: "/Img/Dynia.png",
     category: "ziarna",
+    sizes: ["200 g", "500 g", "1 kg"],
   },
   {
     id: 3,
@@ -25,6 +47,7 @@ export const products: Product[] = [
     price: "24,90 zł",
     image: "/Img/Migdały.png",
     category: "orzechy",
+    sizes: ["200 g", "500 g", "1 kg"],
   },
   {
     id: 4,
@@ -34,22 +57,15 @@ export const products: Product[] = [
     image: "/Img/Olejkokosowy.png",
     category: "oleje",
     featured: true,
-  },
-  {
-    id: 5,
-    name: "Zestaw Energia",
-    desc: "olej + nasiona",
-    price: "59,90 zł",
-    image: "/Img/Olejbio.png", // Placeholder
-    category: "zestawy",
-    featured: true,
-  },
-  {
-    id: 6,
-    name: "Siemię Lniane",
-    desc: "500 g · złociste",
-    price: "12,90 zł",
-    image: "/Img/Migdały.png", // Placeholder
-    category: "ziarna",
+    sizes: ["300 ml", "500 ml", "900 ml"],
   },
 ];
+
+export const products: Product[] = [
+  ...baseProducts,
+  ...baseProducts,
+  ...baseProducts,
+].map((product, index) => ({
+  ...product,
+  id: index + 1,
+}));
