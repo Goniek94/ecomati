@@ -43,7 +43,7 @@ const slides = [
   },
   {
     id: 1,
-    tabLabel: "02. CO ROBIMY",
+    tabLabel: "02. NASZA MISJA",
     title: "Bez kompromisów",
     subtitle: "Proces produkcji",
     content: (

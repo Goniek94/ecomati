@@ -1,16 +1,9 @@
 type Props = {
   category: string;
-  setCategory: (v: string) => void;
-  sort: string;
-  setSort: (v: string) => void;
+  setCategory: (value: string) => void;
 };
 
-export default function ShopFilters({
-  category,
-  setCategory,
-  sort,
-  setSort,
-}: Props) {
+export default function ShopFilters({ category, setCategory }: Props) {
   const categories = [
     { id: "all", label: "Wszystkie" },
     { id: "oleje", label: "Oleje" },
@@ -20,45 +13,20 @@ export default function ShopFilters({
   ];
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-10 mb-20">
-      {/* KATEGORIE */}
-      <div className="flex gap-10">
-        {categories.map((c) => (
-          <button
-            key={c.id}
-            onClick={() => setCategory(c.id)}
-            className={`
-              text-sm uppercase tracking-widest transition
-              ${
-                category === c.id
-                  ? "text-[#3A4A22] border-b border-[#3A4A22]"
-                  : "text-[#6B705C]"
-              }
-            `}
-          >
-            {c.label}
-          </button>
-        ))}
-      </div>
-
-      {/* SORT */}
-      <select
-        value={sort}
-        onChange={(e) => setSort(e.target.value)}
-        className="
-          bg-transparent
-          border-b
-          border-[#3A4A22]/30
-          text-sm
-          uppercase
-          tracking-widest
-          focus:outline-none
-        "
-      >
-        <option value="default">Domyślne</option>
-        <option value="price-asc">Cena ↑</option>
-        <option value="price-desc">Cena ↓</option>
-      </select>
+    <div className="flex gap-8 mb-16 text-sm uppercase tracking-widest">
+      {categories.map((c) => (
+        <button
+          key={c.id}
+          onClick={() => setCategory(c.id)}
+          className={`pb-2 border-b transition ${
+            category === c.id
+              ? "border-[#1F2A14] text-[#1F2A14]"
+              : "border-transparent text-[#6B705C] hover:text-[#1F2A14]"
+          }`}
+        >
+          {c.label}
+        </button>
+      ))}
     </div>
   );
 }
