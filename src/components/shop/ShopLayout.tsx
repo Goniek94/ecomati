@@ -6,11 +6,10 @@ import ShopHeader from "./ShopHeader";
 import ShopFilters from "./ShopFilters";
 import ProductGrid from "./ProductGrid";
 import Footer from "@/components/layout/Footer";
-import { products } from "./Products";
 
 export default function ShopLayout() {
   const [category, setCategory] = useState("all");
-  const [sort, setSort] = useState("default");
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <main className="bg-[#F6F5EE] min-h-screen">
@@ -25,18 +24,17 @@ export default function ShopLayout() {
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-16 mt-24">
             <aside>
               <ShopFilters
-                category={category}
+                activeCategory={category}
                 setCategory={setCategory}
-                sort={sort}
-                setSort={setSort}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
               />
             </aside>
 
             <main>
               <ProductGrid
-                products={products}
-                category={category}
-                sort={sort}
+                activeCategory={category}
+                searchQuery={searchQuery}
               />
             </main>
           </div>

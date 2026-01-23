@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Product {
+  id                  BigInt          @id @default(autoincrement())
+  name                String
+  slug                String          @unique
+  shortDescription    String?         @map("short_description")
+  longDescription     String?         @map("long_description")
+  price               Decimal         @db.Decimal(10, 2)
+  originalPrice       Decimal?        @map("original_price") @db.Decimal(10, 2)
+  currency            String          @default("PLN")
+  mainImage           String?         @map("main_image")
+  galleryImages       String[]        @map("gallery_images")
+  category            String
+  productGroup        String          @map("product_group")
+  tags                String[]
+  weightOptions       Json?           @map("weight_options")
+  ingredients         String?
+  nutritionalInfo     Json?           @map("nutritional_info")
+  properties          String[]
+  usageInstructions   String?         @map("usage_instructions")
+  storageInstructions String?         @map("storage_instructions")
+  allergens           String[]
+  certifications      String[]
+  originCountry       String?         @map("origin_country")
+  producer            String?
+  stockQuantity       Int             @default(0) @map("stock_quantity")
+  isAvailable         Boolean         @default(true) @map("is_available")
+  isFeatured          Boolean         @default(false) @map("is_featured")
+  metaTitle           String?         @map("meta_title")
+  metaDescription     String?         @map("meta_description")
+  metaKeywords        String[]        @map("meta_keywords")
+  createdAt           DateTime        @default(now()) @map("created_at")
+  updatedAt           DateTime        @updatedAt @map("updated_at")
+  deletedAt           DateTime?       @map("deleted_at")
+  orderItems          OrderItem[]
+  reviews             ProductReview[]
+
+  @@index([category])
+  @@index([productGroup])
+  @@index([slug])
+  @@index([isFeatured])
+  @@index([isAvailable])
+  @@map("products")
+}
+
+model Category {
+  id           BigInt     @id @default(autoincrement())
+  name         String
+  slug         String     @unique
+  parentId     BigInt?    @map("parent_id")
+  description  String?
+  icon         String?
+  displayOrder Int        @default(0) @map("display_order")
+  isActive     Boolean    @default(true) @map("is_active")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  parent       Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: Cascade)
+  children     Category[] @relation("CategoryToCategory")
+
+  @@index([parentId])
+  @@index([slug])
+  @@map("categories")
+}
+
+model ProductGroup {
+  id           BigInt   @id @default(autoincrement())
+  name         String
+  slug         String   @unique
+  description  String?
+  icon         String?
+  displayOrder Int      @default(0) @map("display_order")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@map("product_groups")
+}
+
+model Order {
+  id                   BigInt      @id @default(autoincrement())
+  orderNumber          String      @unique @map("order_number")
+  customerEmail        String      @map("customer_email")
+  customerName         String      @map("customer_name")
+  customerPhone        String?     @map("customer_phone")
+  shippingAddressLine1 String      @map("shipping_address_line1")
+  shippingAddressLine2 String?     @map("shipping_address_line2")
+  shippingCity         String      @map("shipping_city")
+  shippingPostalCode   String      @map("shipping_postal_code")
+  shippingCountry      String      @default("Polska") @map("shipping_country")
+  subtotal             Decimal     @db.Decimal(10, 2)
+  shippingCost         Decimal     @default(0) @map("shipping_cost") @db.Decimal(10, 2)
+  tax                  Decimal     @default(0) @db.Decimal(10, 2)
+  total                Decimal     @db.Decimal(10, 2)
+  status               String      @default("pending")
+  paymentStatus        String      @default("pending") @map("payment_status")
+  paymentMethod        String?     @map("payment_method")
+  customerNotes        String?     @map("customer_notes")
+  adminNotes           String?     @map("admin_notes")
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
+  paidAt               DateTime?   @map("paid_at")
+  shippedAt            DateTime?   @map("shipped_at")
+  deliveredAt          DateTime?   @map("delivered_at")
+  items                OrderItem[]
+
+  @@index([status])
+  @@index([customerEmail])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id           BigInt   @id @default(autoincrement())
+  orderId      BigInt   @map("order_id")
+  productId    BigInt   @map("product_id")
+  productName  String   @map("product_name")
+  productImage String?  @map("product_image")
+  selectedSize String?  @map("selected_size")
+  unitPrice    Decimal  @map("unit_price") @db.Decimal(10, 2)
+  quantity     Int
+  subtotal     Decimal  @db.Decimal(10, 2)
+  createdAt    DateTime @default(now()) @map("created_at")
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model ProductReview {
+  id                 BigInt   @id @default(autoincrement())
+  productId          BigInt   @map("product_id")
+  customerName       String   @map("customer_name")
+  customerEmail      String   @map("customer_email")
+  rating             Int
+  title              String?
+  comment            String?
+  isVerifiedPurchase Boolean  @default(false) @map("is_verified_purchase")
+  isApproved         Boolean  @default(false) @map("is_approved")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([isApproved])
+  @@map("product_reviews")
+}
