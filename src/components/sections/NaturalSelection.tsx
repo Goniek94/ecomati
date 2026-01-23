@@ -36,7 +36,10 @@ export default function NaturalSelection() {
   }, []);
 
   return (
-    <section className="relative py-20 bg-[#F6F5EE] overflow-hidden">
+    <section
+      id="natural-selection"
+      className="relative py-20 bg-[#F6F5EE] overflow-hidden"
+    >
       {/* Subtelny separator na górze */}
       <div className="absolute top-0 left-0 right-0 h-px bg-[#1F2A14]/10" />
 

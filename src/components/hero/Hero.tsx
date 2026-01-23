@@ -6,6 +6,13 @@ import HeroOverlay from "./HeroOverlay";
 import HeroTitle from "./HeroTitle";
 
 export default function Hero() {
+  const scrollToNextSection = () => {
+    const nextSection = document.getElementById("natural-selection");
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <section className="relative h-screen w-full overflow-hidden rounded-[28px]">
       {/* NAWIGACJA */}
@@ -37,7 +44,10 @@ export default function Hero() {
       <HeroTitle />
 
       {/* DOLNE CTA */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#F4FFD9]/80 z-20 select-none">
+      <div
+        onClick={scrollToNextSection}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[#F4FFD9]/80 z-20 select-none cursor-pointer hover:text-[#F4FFD9] transition-colors"
+      >
         <span className="text-xs tracking-[0.3em] uppercase">Przewiń</span>
 
         {/* 🔽 PULSUJĄCA STRZAŁKA */}

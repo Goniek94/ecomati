@@ -10,7 +10,10 @@ import {
   Package,
   Truck,
   FileText,
-} from "lucide-react"; // Dodałem ArrowLeft
+  Plus,
+  Minus,
+  Tag,
+} from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import HeroNav from "@/components/hero/HeroNav";
@@ -18,16 +21,31 @@ import Footer from "@/components/layout/Footer";
 import { useCart } from "@/context/CartContext";
 
 export default function CartPage() {
-  const { cart, removeFromCart, totalPrice, cartCount, clearCart } = useCart();
+  const {
+    cart,
+    removeFromCart,
+    updateQuantity,
+    totalPrice,
+    cartCount,
+    clearCart,
+  } = useCart();
   const [step, setStep] = useState(1); // 1: Checkout, 2: Sukces
+  const [promoCode, setPromoCode] = useState("");
+  const [promoApplied, setPromoApplied] = useState(false);
 
   // Opcje dostawy
   const [deliveryMethod, setDeliveryMethod] = useState<"dpd" | "inpost">(
     "inpost",
   );
+  const FREE_DELIVERY_THRESHOLD = 120;
   const deliveryCost =
-    totalPrice > 200 ? 0 : deliveryMethod === "dpd" ? 15 : 12;
+    totalPrice >= FREE_DELIVERY_THRESHOLD
+      ? 0
+      : deliveryMethod === "dpd"
+        ? 15
+        : 12;
   const finalPrice = totalPrice + deliveryCost;
+  const amountToFreeDelivery = FREE_DELIVERY_THRESHOLD - totalPrice;
 
   // Faktura
   const [wantInvoice, setWantInvoice] = useState(false);
@@ -266,7 +284,7 @@ export default function CartPage() {
                 {/* LISTA PRODUKTÓW */}
                 <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto pr-2 mb-6 custom-scrollbar">
                   {cart.map((item) => (
-                    <div key={item.cartId} className="flex gap-4 items-start">
+                    <div key={item.cartId} className="flex gap-3 items-start">
                       <div className="w-16 h-20 bg-[#F6F5EE] rounded-md relative flex-shrink-0 overflow-hidden">
                         <Image
                           src={item.image}
@@ -276,20 +294,41 @@ export default function CartPage() {
                         />
                       </div>
                       <div className="flex-grow">
-                        <h4 className="text-sm font-bold text-[#1F2A14] line-clamp-1">
+                        <h4 className="text-sm font-bold text-[#1F2A14] line-clamp-1 mb-1">
                           {item.name}
                         </h4>
-                        <p className="text-[10px] uppercase tracking-wider text-[#6B705C] mb-1">
+                        <p className="text-[10px] uppercase tracking-wider text-[#6B705C] mb-2">
                           {item.selectedSize}
                         </p>
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs text-[#1F2A14]/60">
-                            {item.quantity} szt.
+
+                        {/* Kontrolki ilości */}
+                        <div className="flex items-center gap-2 mb-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateQuantity(item.cartId, item.quantity - 1)
+                            }
+                            className="w-6 h-6 rounded-md bg-[#F6F5EE] hover:bg-[#1F2A14] hover:text-white transition-colors flex items-center justify-center cursor-pointer"
+                          >
+                            <Minus size={12} />
+                          </button>
+                          <span className="text-sm font-bold min-w-[30px] text-center">
+                            {item.quantity}
                           </span>
-                          <span className="text-sm font-bold">
-                            {item.price}
-                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateQuantity(item.cartId, item.quantity + 1)
+                            }
+                            className="w-6 h-6 rounded-md bg-[#F6F5EE] hover:bg-[#1F2A14] hover:text-white transition-colors flex items-center justify-center cursor-pointer"
+                          >
+                            <Plus size={12} />
+                          </button>
                         </div>
+
+                        <span className="text-sm font-bold text-[#1F2A14]">
+                          {item.price}
+                        </span>
                       </div>
                       <button
                         type="button"
@@ -301,6 +340,57 @@ export default function CartPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* POLE NA KOD RABATOWY */}
+                <div className="mb-4 pb-4 border-b border-[#1F2A14]/10">
+                  <div className="flex gap-2">
+                    <div className="relative flex-grow">
+                      <Tag
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B705C]"
+                        size={16}
+                      />
+                      <input
+                        type="text"
+                        placeholder="Kod rabatowy"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 bg-[#F6F5EE] border border-transparent rounded-lg text-sm text-[#1F2A14] placeholder:text-[#1F2A14]/30 focus:outline-none focus:bg-white focus:border-[#1F2A14]/20 transition-all"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="px-4 py-2 bg-[#1F2A14] text-white rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-[#3A4A22] transition-colors"
+                    >
+                      Zastosuj
+                    </button>
+                  </div>
+                </div>
+
+                {/* INFORMACJA O DARMOWEJ DOSTAWIE */}
+                {amountToFreeDelivery > 0 && (
+                  <div className="mb-4 p-3 bg-[#FFD966]/10 border border-[#FFD966]/30 rounded-lg">
+                    <p className="text-xs text-[#1F2A14]">
+                      Dodaj produkty za{" "}
+                      <span className="font-bold">
+                        {amountToFreeDelivery.toFixed(2).replace(".", ",")} zł
+                      </span>
+                      , aby otrzymać{" "}
+                      <span className="font-bold text-[#3A4A22]">
+                        darmową dostawę
+                      </span>
+                      !
+                    </p>
+                  </div>
+                )}
+
+                {totalPrice >= FREE_DELIVERY_THRESHOLD && (
+                  <div className="mb-4 p-3 bg-[#3A4A22]/10 border border-[#3A4A22]/30 rounded-lg">
+                    <p className="text-xs text-[#3A4A22] font-bold flex items-center gap-2">
+                      <CheckCircle size={14} />
+                      Gratulacje! Masz darmową dostawę!
+                    </p>
+                  </div>
+                )}
 
                 {/* KOSZTY */}
                 <div className="space-y-3 py-4 border-t border-[#1F2A14]/10 text-sm">

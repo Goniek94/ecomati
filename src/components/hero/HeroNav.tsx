@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext"; // <--- IMPORT
+import { Menu, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface HeroNavProps {
   variant?: "light" | "dark";
@@ -14,6 +16,7 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
 
   const [time, setTime] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
   const isHomePage = pathname === "/";
@@ -34,6 +37,23 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHomePage]);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     const update = () => {
@@ -83,7 +103,7 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
   return (
     <nav
       className={`
-        fixed top-0 left-0 right-0 z-50
+        fixed top-0 left-0 right-0 z-[100]
         transition-all duration-500 ease-in-out
         ${containerClasses}
         ${textColor}
@@ -127,9 +147,27 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
           </Link>
         </div>
 
-        {/* PRAWA STRONA - KOSZYK */}
-        <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 flex items-center gap-6 text-xs tracking-widest">
-          <span className="hidden sm:block opacity-80 font-mono">{time}</span>
+        {/* PRAWA STRONA - HAMBURGER + KOSZYK */}
+        <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 flex items-center gap-4 md:gap-6 text-xs tracking-widest z-[110]">
+          <span
+            className="hidden sm:block opacity-80 font-mono"
+            suppressHydrationWarning
+          >
+            {time}
+          </span>
+
+          {/* HAMBURGER MENU - tylko na mobile */}
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className={`md:hidden p-2 ${hoverColor} transition-colors relative z-[110]`}
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
+          </button>
 
           <Link
             href="/koszyk"
@@ -150,6 +188,100 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
           </Link>
         </div>
       </div>
+
+      {/* MOBILE MENU OVERLAY */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            {/* Menu Panel */}
+            <motion.div
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed inset-0 bg-[#1F2A14] z-[9999] overflow-y-auto"
+            >
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 border-b border-[#F4FFD9]/20">
+                  <span className="text-[#F4FFD9] text-sm tracking-[0.35em] font-semibold">
+                    MENU
+                  </span>
+                  <button
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="p-2 text-[#F4FFD9] hover:text-[#FFD966] transition-colors"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+
+                {/* Navigation Links */}
+                <nav className="flex-1 p-8">
+                  <div className="space-y-3">
+                    <Link
+                      href="/"
+                      className={`block py-5 px-6 text-base font-light tracking-[0.2em] uppercase rounded-xl transition-all ${
+                        pathname === "/"
+                          ? "bg-[#FFD966] text-[#1F2A14] font-semibold"
+                          : "text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8"
+                      }`}
+                    >
+                      Home
+                    </Link>
+
+                    <Link
+                      href="/sklep"
+                      className={`block py-5 px-6 text-base font-light tracking-[0.2em] uppercase rounded-xl transition-all ${
+                        pathname.startsWith("/sklep")
+                          ? "bg-[#FFD966] text-[#1F2A14] font-semibold"
+                          : "text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8"
+                      }`}
+                    >
+                      Sklep
+                    </Link>
+
+                    <Link
+                      href="/#about"
+                      className="block py-5 px-6 text-base font-light tracking-[0.2em] uppercase text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8 rounded-xl transition-all"
+                    >
+                      Poznaj Nas
+                    </Link>
+
+                    <Link
+                      href="/#contact"
+                      className="block py-5 px-6 text-base font-light tracking-[0.2em] uppercase text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8 rounded-xl transition-all"
+                    >
+                      Kontakt
+                    </Link>
+                  </div>
+                </nav>
+
+                {/* Footer */}
+                <div className="p-8 border-t border-[#F4FFD9]/20">
+                  <div className="text-center">
+                    <p className="text-[#F4FFD9]/80 text-sm tracking-[0.3em] mb-3 font-light">
+                      ECOMATI
+                    </p>
+                    <p className="text-[#F4FFD9]/50 text-xs font-light italic">
+                      Naturalna selekcja
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

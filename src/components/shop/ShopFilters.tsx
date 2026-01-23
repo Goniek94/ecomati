@@ -3,83 +3,76 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, ChevronRight, Search, X } from "lucide-react";
-import { products } from "./Products";
 
 interface ShopFiltersProps {
   activeCategory: string;
   setCategory: (category: string) => void;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  products: any[]; // Products from database
 }
 
-const FILTER_GROUPS = [
-  {
-    id: "oleje",
-    label: "Oleje Tłoczone",
-    subcategories: [
-      { id: "olej-lniany", label: "Olej Lniany" },
-      { id: "olej-czarnuszka", label: "Olej z Czarnuszki" },
-      { id: "olej-kokosowy", label: "Olej Kokosowy" },
-      { id: "oliwa", label: "Oliwa z Oliwek" },
-      { id: "olej-inne", label: "Pozostałe Oleje" },
-    ],
-  },
-  {
-    id: "ziarna",
-    label: "Ziarna i Nasiona",
-    subcategories: [
-      { id: "ziarna-dynia", label: "Pestki Dyni" },
-      { id: "ziarna-slonecznik", label: "Słonecznik" },
-      { id: "ziarna-inne", label: "Chia i Inne" },
-    ],
-  },
-  {
-    id: "orzechy",
-    label: "Orzechy",
-    subcategories: [
-      { id: "orzechy-migdaly", label: "Migdały" },
-      { id: "orzechy-wloskie", label: "Włoskie" },
-      { id: "orzechy-nerkowce", label: "Nerkowce" },
-    ],
-  },
-  {
-    id: "kielki",
-    label: "Kiełki i Akcesoria",
-    subcategories: [
-      { id: "nasiona-kielki", label: "Nasiona na Kiełki" },
-      { id: "akcesoria", label: "Akcesoria" },
-    ],
-  },
-  {
-    id: "maki",
-    label: "Mąki Keto/Bio",
-    subcategories: [
-      { id: "maki-kokosowa", label: "Mąka Kokosowa" },
-      { id: "maki-migdalowa", label: "Mąka Migdałowa" },
-    ],
-  },
-  {
-    id: "dodatki",
-    label: "Zdrowe Dodatki",
-    subcategories: [
-      { id: "slodziki", label: "Słodziki Naturalne" },
-      { id: "sosy", label: "Sosy i Przyprawy" },
-    ],
-  },
-  {
-    id: "zestawy",
-    label: "Zestawy Prezentowe",
-    subcategories: [],
-  },
-];
+interface FilterGroup {
+  id: string;
+  name: string;
+  count: number;
+  subcategories: { name: string; count: number }[];
+}
+
+// Helper function to build filter groups dynamically from products with subcategories
+function buildFilterGroups(products: any[]): FilterGroup[] {
+  const categoryMap = new Map<
+    string,
+    { count: number; subcategories: Map<string, number> }
+  >();
+
+  products.forEach((product) => {
+    const category = product.category;
+    const subcategory = product.productGroup;
+
+    if (!categoryMap.has(category)) {
+      categoryMap.set(category, { count: 0, subcategories: new Map() });
+    }
+
+    const catData = categoryMap.get(category)!;
+    catData.count++;
+
+    if (subcategory) {
+      catData.subcategories.set(
+        subcategory,
+        (catData.subcategories.get(subcategory) || 0) + 1,
+      );
+    }
+  });
+
+  return Array.from(categoryMap.entries())
+    .map(([name, data]) => ({
+      id: name.toLowerCase().replace(/\s+/g, "-"),
+      name,
+      count: data.count,
+      subcategories: Array.from(data.subcategories.entries())
+        .map(([subName, subCount]) => ({
+          name: subName,
+          count: subCount,
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
 
 export default function ShopFilters({
   activeCategory,
   setCategory,
   searchQuery,
   setSearchQuery,
+  products,
 }: ShopFiltersProps) {
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(["oleje"]);
+  // Dynamically build filter groups from products
+  const FILTER_GROUPS = buildFilterGroups(products);
+
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([
+    FILTER_GROUPS[0]?.id || "",
+  ]);
 
   const toggleGroup = (groupId: string) => {
     setExpandedGroups((prev) =>
@@ -89,10 +82,9 @@ export default function ShopFilters({
     );
   };
 
-  const getCount = (filterId: string, isGroup: boolean) => {
-    if (filterId === "all") return products.length;
-    if (isGroup) return products.filter((p) => p.group === filterId).length;
-    return products.filter((p) => p.category === filterId).length;
+  const getCount = (categoryName: string) => {
+    if (categoryName === "all") return products.length;
+    return products.filter((p) => p.category === categoryName).length;
   };
 
   return (
@@ -141,79 +133,80 @@ export default function ShopFilters({
       </button>
 
       {/* LISTA GRUP */}
-      <div className="flex flex-col gap-5">
-        {FILTER_GROUPS.map((group) => {
-          const isGroupActive =
-            activeCategory === group.id ||
-            group.subcategories.some((sub) => sub.id === activeCategory);
+      <div className="flex flex-col gap-3">
+        {FILTER_GROUPS.map((group: FilterGroup) => {
+          const isGroupActive = activeCategory === group.name;
           const isExpanded = expandedGroups.includes(group.id);
-          const groupCount = getCount(group.id, true);
+          const groupCount = group.count;
+          const hasSubcategories = group.subcategories.length > 0;
 
           return (
             <div key={group.id} className="flex flex-col">
               {/* NAGŁÓWEK GRUPY */}
-              <div
-                className="flex items-center justify-between cursor-pointer group/btn py-1"
-                onClick={() => {
-                  toggleGroup(group.id);
-                  if (group.subcategories.length === 0) setCategory(group.id);
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  {group.subcategories.length > 0 && (
-                    <span className="text-[#1F2A14]/40">
-                      {isExpanded ? (
-                        <ChevronDown size={14} />
-                      ) : (
-                        <ChevronRight size={14} />
-                      )}
-                    </span>
-                  )}
+              <div className="flex items-center justify-between group/btn py-1">
+                <div
+                  className="flex items-center gap-2 flex-1 cursor-pointer"
+                  onClick={() => {
+                    setCategory(group.name);
+                  }}
+                >
                   <span
                     className={`text-sm tracking-wide transition-colors ${isGroupActive ? "font-bold text-[#1F2A14]" : "font-medium text-[#1F2A14]/80 group-hover/btn:text-[#1F2A14]"}`}
                   >
-                    {group.label}
+                    {group.name}
                   </span>
                 </div>
-                <span className="text-xs font-mono text-[#6B705C]/60">
-                  ({groupCount})
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono text-[#6B705C]/60">
+                    ({groupCount})
+                  </span>
+                  {hasSubcategories && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleGroup(group.id);
+                      }}
+                      className="p-1 hover:bg-[#1F2A14]/5 rounded transition-colors"
+                    >
+                      {isExpanded ? (
+                        <ChevronDown size={16} className="text-[#3A4A22]" />
+                      ) : (
+                        <ChevronRight size={16} className="text-[#1F2A14]/60" />
+                      )}
+                    </button>
+                  )}
+                </div>
               </div>
 
               {/* PODKATEGORIE */}
               <AnimatePresence>
-                {isExpanded && group.subcategories.length > 0 && (
+                {isExpanded && hasSubcategories && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="flex flex-col gap-2 pl-7 pt-2 border-l-2 border-[#1F2A14]/5 ml-2 mt-1">
-                      {/* Opcja "Wszystkie z tej grupy" */}
-                      <button
-                        onClick={() => setCategory(group.id)}
-                        className={`text-left text-xs uppercase tracking-widest py-1 transition-colors cursor-pointer ${activeCategory === group.id ? "text-[#3A4A22] font-bold" : "text-[#1F2A14]/60 hover:text-[#3A4A22]"}`}
-                      >
-                        Wszystkie
-                      </button>
-
-                      {/* Konkretne warianty */}
+                    <div className="flex flex-col gap-1 pl-4 pt-2 border-l-2 border-[#1F2A14]/10 ml-2">
                       {group.subcategories.map((sub) => {
-                        const count = getCount(sub.id, false);
-                        const isActive = activeCategory === sub.id;
+                        const isSubActive =
+                          activeCategory === `${group.name}:${sub.name}`;
                         return (
                           <button
-                            key={sub.id}
-                            onClick={() => setCategory(sub.id)}
-                            className={`flex items-center justify-between w-full text-left py-1 group/sub cursor-pointer ${isActive ? "text-[#1F2A14] font-semibold" : "text-[#1F2A14]/70 font-normal hover:text-[#1F2A14]"}`}
+                            key={sub.name}
+                            onClick={() =>
+                              setCategory(`${group.name}:${sub.name}`)
+                            }
+                            className={`flex items-center justify-between text-left py-1.5 px-2 rounded-lg transition-all ${
+                              isSubActive
+                                ? "bg-[#3A4A22]/10 text-[#3A4A22] font-semibold"
+                                : "text-[#1F2A14]/70 hover:bg-[#1F2A14]/5 hover:text-[#1F2A14]"
+                            }`}
                           >
-                            <span className="text-sm">{sub.label}</span>
-                            <span
-                              className={`text-[10px] font-mono transition-opacity ${isActive ? "text-[#3A4A22] opacity-100" : "text-[#6B705C]/40 opacity-0 group-hover/sub:opacity-100"}`}
-                            >
-                              {count}
+                            <span className="text-xs">{sub.name}</span>
+                            <span className="text-xs font-mono text-[#6B705C]/50">
+                              ({sub.count})
                             </span>
                           </button>
                         );

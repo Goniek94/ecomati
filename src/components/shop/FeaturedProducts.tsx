@@ -3,12 +3,26 @@
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "./ProductCard";
-import { products } from "./Products"; // Teraz importuje 12 produktów
 
-export default function FeaturedProducts() {
-  // Nie robimy już .slice(0, 4) -> bierzemy wszystko
-  const featured = products;
+interface Product {
+  id: number;
+  name: string;
+  desc: string;
+  price: string;
+  displaySize?: string;
+  variantCount?: number;
+  image: string;
+  category: string;
+  group: string;
+  featured?: boolean;
+  sizes?: string[];
+}
 
+interface FeaturedProductsProps {
+  products: Product[];
+}
+
+export default function FeaturedProducts({ products }: FeaturedProductsProps) {
   return (
     <section className="bg-[#F6F5EE] pb-32 pt-16">
       <div className="max-w-[1700px] mx-auto px-6 md:px-12">
@@ -27,7 +41,7 @@ export default function FeaturedProducts() {
 
         {/* GRID PRODUKTÓW (3 rzędy po 4 kolumny) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 gap-y-12">
-          {featured.map((product) => (
+          {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>

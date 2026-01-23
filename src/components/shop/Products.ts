@@ -3,6 +3,8 @@ export interface Product {
   name: string;
   desc: string;
   price: string;
+  displaySize?: string;
+  variantCount?: number;
   image: string;
   category: string; // Precyzyjna kategoria (np. "olej-lniany")
   group: string; // Grupa główna (np. "oleje", "maki", "dodatki")

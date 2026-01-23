@@ -59,6 +59,21 @@ export default function ProductCard({ product }: { product: Product }) {
               Bestseller
             </div>
           )}
+
+          {/* Display size badge on image */}
+          {product.displaySize && (
+            <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm text-[#1F2A14] text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg border border-[#1F2A14]/10 z-10">
+              {product.displaySize}
+            </div>
+          )}
+
+          {/* Multiple variants indicator */}
+          {product.variantCount && product.variantCount > 1 && (
+            <div className="absolute bottom-3 left-3 bg-[#3A4A22]/90 backdrop-blur-sm text-[#F4FFD9] text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md shadow-md z-10">
+              +{product.variantCount - 1}{" "}
+              {product.variantCount === 2 ? "rozmiar" : "rozmiary"}
+            </div>
+          )}
         </div>
 
         {/* INFO */}
@@ -69,6 +84,8 @@ export default function ProductCard({ product }: { product: Product }) {
           <p className="text-[10px] text-[#6B705C] uppercase tracking-widest mb-4">
             {product.desc}
           </p>
+
+          {/* Price */}
           <span className="text-lg font-bold text-[#1F2A14] mt-auto">
             {product.price}
           </span>

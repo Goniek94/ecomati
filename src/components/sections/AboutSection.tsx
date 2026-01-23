@@ -167,7 +167,7 @@ export default function AboutSlider() {
               </div>
 
               {/* Przycisk CTA */}
-              <div className="mt-8">
+              <div className="mt-8 mb-16">
                 <button className="group relative px-8 py-4 border border-[#F6F5EE]/30 rounded-full overflow-hidden hover:border-[#FFD966] transition-colors duration-300">
                   <span className="relative z-10 text-sm tracking-widest font-semibold group-hover:text-[#1F2A14] transition-colors duration-300">
                     WIĘCEJ O NAS
@@ -229,7 +229,7 @@ export default function AboutSlider() {
         </AnimatePresence>
 
         {/* Pasek postępu slajdów na dole */}
-        <div className="flex gap-2 mt-12 md:mt-0">
+        <div className="flex gap-2 mt-16 lg:mt-8">
           {SLIDES.map((_, idx) => (
             <div
               key={idx}

@@ -20,6 +20,7 @@ interface CartContextType {
   // ZMIANA: dodajemy opcjonalny parametr quantity (domyślnie 1)
   addToCart: (product: Product, size: string, quantity?: number) => void;
   removeFromCart: (cartId: string) => void;
+  updateQuantity: (cartId: string, newQuantity: number) => void;
   clearCart: () => void;
   totalPrice: number;
   cartCount: number;
@@ -70,6 +71,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setCart((prev) => prev.filter((item) => item.cartId !== cartId));
   };
 
+  const updateQuantity = (cartId: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      removeFromCart(cartId);
+      return;
+    }
+    setCart((prev) =>
+      prev.map((item) =>
+        item.cartId === cartId ? { ...item, quantity: newQuantity } : item,
+      ),
+    );
+  };
+
   const clearCart = () => setCart([]);
 
   const totalPrice = cart.reduce((sum, item) => {
@@ -87,6 +100,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         cart,
         addToCart,
         removeFromCart,
+        updateQuantity,
         clearCart,
         totalPrice,
         cartCount,
