@@ -1,31 +1,53 @@
-import { Product } from "./Products";
+"use client";
+
+import { motion } from "framer-motion";
 import ProductCard from "./ProductCard";
+import { products } from "./Products";
 
-type Props = {
-  products: Product[];
-  category: string;
-  sort: string;
-};
+interface ProductGridProps {
+  activeCategory: string;
+  // Nowy prop
+  searchQuery: string;
+}
 
-export default function ProductGrid({ products, category, sort }: Props) {
-  let filtered = [...products];
+export default function ProductGrid({
+  activeCategory,
+  searchQuery,
+}: ProductGridProps) {
+  // LOGIKA FILTROWANIA
+  const filteredProducts = products.filter((product) => {
+    // 1. Filtr kategorii (Kategoria LUB Grupa LUB Wszystkie)
+    const matchesCategory =
+      activeCategory === "all" ||
+      product.category === activeCategory ||
+      product.group === activeCategory;
 
-  if (category !== "all") {
-    filtered = filtered.filter((p) => p.category === category);
-  }
+    // 2. Filtr wyszukiwarki (Nazwa LUB Opis)
+    const query = searchQuery.toLowerCase();
+    const matchesSearch =
+      product.name.toLowerCase().includes(query) ||
+      product.desc.toLowerCase().includes(query);
 
-  if (sort === "price-asc") {
-    filtered.sort((a, b) => a.price - b.price);
-  }
+    return matchesCategory && matchesSearch;
+  });
 
-  if (sort === "price-desc") {
-    filtered.sort((a, b) => b.price - a.price);
+  if (filteredProducts.length === 0) {
+    return (
+      <div className="py-20 text-center">
+        <h3 className="text-xl font-serif text-[#1F2A14] mb-2">
+          Nie znaleziono produktów
+        </h3>
+        <p className="text-[#6B705C]">
+          Spróbuj zmienić kategorię lub wpisać inną frazę.
+        </p>
+      </div>
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
-      {filtered.map((p) => (
-        <ProductCard key={p.id} product={p} />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
+      {filteredProducts.map((product) => (
+        <ProductCard key={product.id} product={product} />
       ))}
     </div>
   );

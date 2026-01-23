@@ -18,16 +18,14 @@ html {
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family:
-    Arial, Helvetica, sans-serif; /* Tu docelowo warto wpiąć ładniejszy font */
+  font-family: Arial, Helvetica, sans-serif;
 
   /* Antialiasing - kluczowe dla cienkiego tekstu na ciemnym tle */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* PREMIUM SCROLLBAR */
-/* Zastępuje domyślny systemowy pasek */
+/* --- GŁÓWNY SYSTEMOWY SCROLLBAR (Dla całej strony) --- */
 ::-webkit-scrollbar {
   width: 10px;
 }
@@ -59,7 +57,7 @@ body {
   outline-offset: 4px;
 }
 
-/* UTILITIES (Opcjonalne klasy pomocnicze) */
+/* --- UTILITIES (Klasy pomocnicze) --- */
 @layer utilities {
   /* Klasa do szybkiego centrowania absolutnego */
   .absolute-center {
@@ -67,5 +65,34 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+  }
+
+  /* --- UKRYWANIE SUWAKA (np. dla mobile) --- */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* --- CUSTOM SCROLLBAR (Dla filtrów w sklepie) --- */
+  /* Cienki, subtelny, ciemny (pasuje do jasnego tła sklepu) */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(31, 42, 20, 0.1); /* Ciemny kolor z przezroczystością */
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(31, 42, 20, 0.3); /* Ciemniejszy po najechaniu */
   }
 }
