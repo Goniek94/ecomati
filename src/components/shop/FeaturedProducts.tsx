@@ -4,6 +4,12 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import ProductCard from "./ProductCard";
 
+interface ProductVariant {
+  size: string;
+  price: string;
+  priceNumeric: number;
+}
+
 interface Product {
   id: number;
   name: string;
@@ -16,6 +22,7 @@ interface Product {
   group: string;
   featured?: boolean;
   sizes?: string[];
+  variants?: ProductVariant[];
 }
 
 interface FeaturedProductsProps {
@@ -28,7 +35,7 @@ export default function FeaturedProducts({ products }: FeaturedProductsProps) {
       <div className="max-w-[1700px] mx-auto px-6 md:px-12">
         {/* NAGŁÓWEK GRIDU */}
         <div className="flex justify-between items-end mb-12">
-          <h3 className="text-xl font-bold text-[#1F2A14] tracking-widest uppercase">
+          <h3 className="text-xl md:text-xl font-bold text-[#1F2A14] tracking-widest uppercase text-center md:text-left w-full md:w-auto">
             Wybrane dla Ciebie
           </h3>
           <Link

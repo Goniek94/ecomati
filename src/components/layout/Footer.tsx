@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Facebook, Instagram, Linkedin, ArrowUpRight } from "lucide-react";
 
 export default function Footer() {
@@ -11,13 +12,19 @@ export default function Footer() {
       <div className="max-w-[1600px] mx-auto px-6 md:px-12">
         {/* --- GÓRNA CZĘŚĆ (GRID) --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-20 mb-20">
-          {/* KOLUMNA 1: MARKA */}
+          {/* KOLUMNA 1: MARKA (LOGO) */}
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <Link
               href="/"
-              className="text-xl font-bold tracking-[0.2em] mb-8 block"
+              className="mb-8 block transition-opacity hover:opacity-80"
             >
-              ECOMATI
+              <Image
+                src="/Img/logo.png"
+                alt="Ecomati Logo"
+                width={450}
+                height={135}
+                className="w-auto h-[131px] object-contain mix-blend-screen"
+              />
             </Link>
             <p className="text-[#F6F5EE]/60 text-sm leading-relaxed mb-8 max-w-xs">
               Naturalne oleje tłoczone na zimno. Dbamy o to, aby każda kropla
@@ -102,7 +109,7 @@ export default function Footer() {
   );
 }
 
-// Pomocnicze komponenty dla czystości kodu
+// Pomocnicze komponenty
 function FooterLink({
   href,
   children,

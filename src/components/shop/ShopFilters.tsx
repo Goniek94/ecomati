@@ -19,7 +19,7 @@ interface FilterGroup {
   subcategories: { name: string; count: number }[];
 }
 
-// Helper function to build filter groups dynamically from products with subcategories
+// Helper function to build filter groups dynamically from products with product names as subcategories
 function buildFilterGroups(products: any[]): FilterGroup[] {
   const categoryMap = new Map<
     string,
@@ -28,7 +28,7 @@ function buildFilterGroups(products: any[]): FilterGroup[] {
 
   products.forEach((product) => {
     const category = product.category;
-    const subcategory = product.productGroup;
+    const productName = product.name; // Use product name as subcategory
 
     if (!categoryMap.has(category)) {
       categoryMap.set(category, { count: 0, subcategories: new Map() });
@@ -37,11 +37,9 @@ function buildFilterGroups(products: any[]): FilterGroup[] {
     const catData = categoryMap.get(category)!;
     catData.count++;
 
-    if (subcategory) {
-      catData.subcategories.set(
-        subcategory,
-        (catData.subcategories.get(subcategory) || 0) + 1,
-      );
+    // Add product name as subcategory (each product is a subcategory)
+    if (productName) {
+      catData.subcategories.set(productName, 1); // Each product appears once
     }
   });
 
@@ -112,22 +110,29 @@ export default function ShopFilters({
       </div>
 
       {/* HEADER KATEGORII */}
-      <div className="hidden lg:block pb-2 border-b border-[#1F2A14]/10">
-        <h3 className="text-xs font-bold tracking-[0.2em] uppercase text-[#1F2A14]">
+      <div className="pb-3 border-b-2 border-[#3A4A22]/20 relative">
+        <h3 className="text-sm font-bold tracking-[0.25em] uppercase text-[#1F2A14] mb-1">
           Kategorie
         </h3>
+        <div className="absolute bottom-0 left-0 w-16 h-0.5 bg-[#FFD966]"></div>
       </div>
 
       {/* PRZYCISK "WSZYSTKIE" */}
       <button
         onClick={() => setCategory("all")}
         className={`
-          flex items-center justify-between w-full text-left group cursor-pointer
-          ${activeCategory === "all" ? "text-[#3A4A22] font-bold" : "text-[#1F2A14] font-medium"}
+          flex items-center justify-between w-full text-left px-4 py-3 rounded-xl transition-all
+          ${
+            activeCategory === "all"
+              ? "bg-gradient-to-r from-[#3A4A22] to-[#4A5A32] text-[#F4FFD9] font-bold shadow-md"
+              : "bg-[#F6F5EE] text-[#1F2A14] font-medium hover:bg-[#3A4A22]/10 hover:shadow-sm"
+          }
         `}
       >
-        <span>Wszystkie produkty</span>
-        <span className="text-xs font-mono text-[#6B705C]/60">
+        <span className="text-sm tracking-wide">Wszystkie produkty</span>
+        <span
+          className={`text-xs font-mono ${activeCategory === "all" ? "text-[#FFD966]" : "text-[#6B705C]/60"}`}
+        >
           ({products.length})
         </span>
       </button>
@@ -143,37 +148,46 @@ export default function ShopFilters({
           return (
             <div key={group.id} className="flex flex-col">
               {/* NAGŁÓWEK GRUPY */}
-              <div className="flex items-center justify-between group/btn py-1">
-                <div
-                  className="flex items-center gap-2 flex-1 cursor-pointer"
-                  onClick={() => {
+              <div
+                className={`flex items-center justify-between px-4 py-3 rounded-xl transition-all cursor-pointer group/btn ${
+                  isGroupActive
+                    ? "bg-[#F6F5EE] border-l-4 border-[#3A4A22] shadow-sm"
+                    : "hover:bg-[#F6F5EE]/50 border-l-4 border-transparent"
+                }`}
+                onClick={() => {
+                  // Toggle expansion when clicking on category name
+                  if (hasSubcategories) {
+                    toggleGroup(group.id);
+                  } else {
                     setCategory(group.name);
-                  }}
-                >
+                  }
+                }}
+              >
+                <div className="flex items-center gap-2 flex-1">
                   <span
-                    className={`text-sm tracking-wide transition-colors ${isGroupActive ? "font-bold text-[#1F2A14]" : "font-medium text-[#1F2A14]/80 group-hover/btn:text-[#1F2A14]"}`}
+                    className={`text-sm tracking-wide transition-colors ${
+                      isGroupActive
+                        ? "font-bold text-[#1F2A14]"
+                        : "font-medium text-[#1F2A14]/80 group-hover/btn:text-[#1F2A14]"
+                    }`}
                   >
                     {group.name}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-mono text-[#6B705C]/60">
+                  <span
+                    className={`text-xs font-mono ${isGroupActive ? "text-[#3A4A22] font-semibold" : "text-[#6B705C]/60"}`}
+                  >
                     ({groupCount})
                   </span>
                   {hasSubcategories && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleGroup(group.id);
-                      }}
-                      className="p-1 hover:bg-[#1F2A14]/5 rounded transition-colors"
-                    >
+                    <div className="p-1">
                       {isExpanded ? (
                         <ChevronDown size={16} className="text-[#3A4A22]" />
                       ) : (
                         <ChevronRight size={16} className="text-[#1F2A14]/60" />
                       )}
-                    </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -188,7 +202,7 @@ export default function ShopFilters({
                     transition={{ duration: 0.2 }}
                     className="overflow-hidden"
                   >
-                    <div className="flex flex-col gap-1 pl-4 pt-2 border-l-2 border-[#1F2A14]/10 ml-2">
+                    <div className="flex flex-col gap-1.5 pl-6 pt-3 pb-2 border-l-2 border-[#FFD966]/40 ml-4">
                       {group.subcategories.map((sub) => {
                         const isSubActive =
                           activeCategory === `${group.name}:${sub.name}`;
@@ -198,14 +212,29 @@ export default function ShopFilters({
                             onClick={() =>
                               setCategory(`${group.name}:${sub.name}`)
                             }
-                            className={`flex items-center justify-between text-left py-1.5 px-2 rounded-lg transition-all ${
+                            className={`flex items-center justify-between text-left py-2 px-3 rounded-lg transition-all group/sub ${
                               isSubActive
-                                ? "bg-[#3A4A22]/10 text-[#3A4A22] font-semibold"
-                                : "text-[#1F2A14]/70 hover:bg-[#1F2A14]/5 hover:text-[#1F2A14]"
+                                ? "bg-gradient-to-r from-[#FFD966]/20 to-[#FFD966]/10 text-[#1F2A14] font-semibold border border-[#FFD966]/30 shadow-sm"
+                                : "text-[#1F2A14]/70 hover:bg-[#F6F5EE] hover:text-[#1F2A14] hover:border hover:border-[#1F2A14]/10"
                             }`}
                           >
-                            <span className="text-xs">{sub.name}</span>
-                            <span className="text-xs font-mono text-[#6B705C]/50">
+                            <span className="text-xs flex items-center gap-2">
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full transition-all ${
+                                  isSubActive
+                                    ? "bg-[#FFD966]"
+                                    : "bg-[#1F2A14]/20 group-hover/sub:bg-[#3A4A22]"
+                                }`}
+                              ></span>
+                              {sub.name}
+                            </span>
+                            <span
+                              className={`text-xs font-mono ${
+                                isSubActive
+                                  ? "text-[#3A4A22] font-bold"
+                                  : "text-[#6B705C]/50"
+                              }`}
+                            >
                               ({sub.count})
                             </span>
                           </button>

@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { createPortal } from "react-dom"; // <--- 1. IMPORT PORTALU
+import { createPortal } from "react-dom";
 
 interface HeroNavProps {
   variant?: "light" | "dark";
@@ -18,12 +19,11 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
   const [time, setTime] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false); // <--- 2. STAN MONTOWANIA
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
 
   const isHomePage = pathname === "/";
 
-  // Ustawienie flagi mounted po stronie klienta
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -45,12 +45,10 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHomePage]);
 
-  // Close mobile menu when route changes
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Prevent body scroll when menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -118,16 +116,19 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
         `}
       >
         <div className="relative w-full h-full min-h-[30px]">
-          {/* LOGO */}
+          {/* LOGO - PRZESUNIĘTE MAKSYMALNIE W LEWO */}
           <Link
             href="/"
-            className={`
-              absolute left-6 md:left-10 top-1/2 -translate-y-1/2
-              text-xs tracking-[0.35em] font-semibold
-              ${hoverColor} transition-colors
-            `}
+            className="absolute -left-4 md:left-4 top-1/2 -translate-y-1/2 transition-opacity hover:opacity-80"
           >
-            ECOMATI
+            <Image
+              src="/Img/logo.png"
+              alt="Ecomati Logo"
+              width={420}
+              height={120}
+              priority
+              className="w-auto h-[80px] md:h-[100px] object-contain mix-blend-screen"
+            />
           </Link>
 
           {/* MENU ŚRODKOWE */}
@@ -167,7 +168,7 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
               {time}
             </span>
 
-            {/* HAMBURGER MENU - tylko na mobile */}
+            {/* HAMBURGER MENU */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className={`md:hidden p-2 ${hoverColor} transition-colors relative z-[110]`}
@@ -182,14 +183,13 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
 
             <Link
               href="/koszyk"
-              className="relative text-lg hover:opacity-100 transition-opacity"
+              className="relative text-lg md:text-2xl hover:opacity-100 transition-opacity"
             >
               🛒
-              {/* BADGE Z LICZNIKIEM */}
               <span
                 className={`
                   absolute -top-2 -right-3
-                  text-[10px] rounded-full px-1.5 font-bold min-w-[18px] text-center
+                  text-[10px] md:text-xs rounded-full px-1.5 md:px-2 font-bold min-w-[18px] md:min-w-[22px] text-center
                   ${cartBadge}
                   transition-colors duration-300
                 `}
@@ -201,13 +201,12 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
         </div>
       </nav>
 
-      {/* MOBILE MENU PORTAL - TO JEST KLUCZOWA ZMIANA */}
+      {/* MOBILE MENU PORTAL */}
       {mounted &&
         createPortal(
           <AnimatePresence>
             {isMobileMenuOpen && (
               <>
-                {/* Backdrop */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -217,7 +216,6 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
                   onClick={() => setIsMobileMenuOpen(false)}
                 />
 
-                {/* Menu Panel */}
                 <motion.div
                   initial={{ x: "100%" }}
                   animate={{ x: 0 }}
@@ -280,12 +278,18 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
                       </div>
                     </nav>
 
-                    {/* Footer */}
+                    {/* Footer w menu mobilnym */}
                     <div className="p-8 border-t border-[#F4FFD9]/20">
                       <div className="text-center">
-                        <p className="text-[#F4FFD9]/80 text-sm tracking-[0.3em] mb-3 font-light">
-                          ECOMATI
-                        </p>
+                        <div className="mb-4 flex justify-center">
+                          <Image
+                            src="/Img/logo.png"
+                            alt="Ecomati"
+                            width={225}
+                            height={68}
+                            className="w-auto h-[70px] opacity-80 mix-blend-screen"
+                          />
+                        </div>
                         <p className="text-[#F4FFD9]/50 text-xs font-light italic">
                           Naturalna selekcja
                         </p>
@@ -296,7 +300,7 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
               </>
             )}
           </AnimatePresence>,
-          document.body, // Portal renderuje menu bezpośrednio w body
+          document.body,
         )}
     </>
   );

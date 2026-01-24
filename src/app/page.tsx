@@ -5,6 +5,7 @@ import AboutSection from "@/components/sections/AboutSection";
 import ContactSection from "@/components/sections/ContactSection";
 import Footer from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
+import { Product } from "@prisma/client";
 
 async function getFeaturedProducts() {
   try {
@@ -19,7 +20,7 @@ async function getFeaturedProducts() {
       },
     });
 
-    return products.map((p) => {
+    return products.map((p: Product) => {
       const weightOptions = p.weightOptions as any;
       const hasVariants =
         weightOptions?.variants && weightOptions.variants.length > 0;
@@ -29,6 +30,15 @@ async function getFeaturedProducts() {
       const displaySize = firstVariant?.size || "";
       const displayPrice = firstVariant?.price || p.price;
       const variantCount = hasVariants ? weightOptions.variants.length : 0;
+
+      // Map variants to frontend format with prices
+      const variants = hasVariants
+        ? weightOptions.variants.map((v: any) => ({
+            size: v.size,
+            price: `${v.price} zł`,
+            priceNumeric: parseFloat(v.price),
+          }))
+        : undefined;
 
       return {
         id: Number(p.id),
@@ -44,6 +54,7 @@ async function getFeaturedProducts() {
         sizes: hasVariants
           ? weightOptions.variants.map((v: any) => v.size)
           : [],
+        variants, // Add full variants array
       };
     });
   } catch (error) {

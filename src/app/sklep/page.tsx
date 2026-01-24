@@ -29,6 +29,15 @@ export default async function ShopPage() {
     const displayPrice = firstVariant?.price || p.price;
     const variantCount = hasVariants ? weightOptions.variants.length : 0;
 
+    // Map variants to frontend format with prices
+    const variants = hasVariants
+      ? weightOptions.variants.map((v: any) => ({
+          size: v.size,
+          price: `${v.price} zł`,
+          priceNumeric: parseFloat(v.price),
+        }))
+      : undefined;
+
     return {
       id: Number(p.id),
       name: p.name,
@@ -47,6 +56,7 @@ export default async function ShopPage() {
       ingredients: p.ingredients || "",
       // Opcjonalnie: obsługa wag z JSONa
       sizes: hasVariants ? weightOptions.variants.map((v: any) => v.size) : [],
+      variants, // Add full variants array
     };
   });
 

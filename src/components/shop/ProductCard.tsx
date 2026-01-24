@@ -5,25 +5,36 @@ import { motion } from "framer-motion";
 import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { Product } from "./Products";
-import { useCart } from "@/context/CartContext"; // <--- IMPORT
-import { useToast } from "@/context/ToastContext"; // <--- IMPORT
+import { useCart } from "@/context/CartContext";
+import { useToast } from "@/context/ToastContext";
 
 export default function ProductCard({ product }: { product: Product }) {
   const [isHovered, setIsHovered] = useState(false);
-  const { addToCart } = useCart(); // <--- Pobieramy funkcję
-  const { showToast } = useToast(); // <--- Pobieramy toasta
+  const { addToCart } = useCart();
+  const { showToast } = useToast();
 
-  // Funkcja szybkiego dodawania
+  // State for selected variant
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
+
+  // Get current variant or use default
+  const currentVariant = product.variants?.[selectedVariantIndex];
+  const displayPrice = currentVariant?.price || product.price;
+  const displaySize = currentVariant?.size || product.sizes?.[0] || "Standard";
+
+  // Quick add function
   const handleQuickAdd = (e: React.MouseEvent) => {
-    e.preventDefault(); // Nie wchodzimy w szczegóły
+    e.preventDefault();
     e.stopPropagation();
 
-    // Jeśli produkt ma rozmiary, bierzemy pierwszy, jeśli nie - "Standard"
-    const defaultSize =
-      product.sizes && product.sizes.length > 0 ? product.sizes[0] : "Standard";
+    addToCart(product, displaySize, 1);
+    showToast(`Dodano do koszyka: ${product.name} (${displaySize})`);
+  };
 
-    addToCart(product, defaultSize, 1);
-    showToast(`Dodano do koszyka: ${product.name}`);
+  // Handle variant selection
+  const handleVariantClick = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedVariantIndex(index);
   };
 
   return (
@@ -45,7 +56,7 @@ export default function ProductCard({ product }: { product: Product }) {
       onMouseLeave={() => setIsHovered(false)}
     >
       <Link href={`/sklep/${product.id}`} className="flex flex-col h-full">
-        {/* ZDJĘCIE */}
+        {/* IMAGE */}
         <div className="relative w-full aspect-[4/5] overflow-hidden bg-[#F6F5EE] border-b border-[#1F2A14]/10">
           <motion.img
             src={product.image}
@@ -59,21 +70,6 @@ export default function ProductCard({ product }: { product: Product }) {
               Bestseller
             </div>
           )}
-
-          {/* Display size badge on image */}
-          {product.displaySize && (
-            <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm text-[#1F2A14] text-xs font-bold px-3 py-1.5 rounded-lg shadow-lg border border-[#1F2A14]/10 z-10">
-              {product.displaySize}
-            </div>
-          )}
-
-          {/* Multiple variants indicator */}
-          {product.variantCount && product.variantCount > 1 && (
-            <div className="absolute bottom-3 left-3 bg-[#3A4A22]/90 backdrop-blur-sm text-[#F4FFD9] text-[9px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md shadow-md z-10">
-              +{product.variantCount - 1}{" "}
-              {product.variantCount === 2 ? "rozmiar" : "rozmiary"}
-            </div>
-          )}
         </div>
 
         {/* INFO */}
@@ -85,14 +81,42 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.desc}
           </p>
 
-          {/* Price */}
-          <span className="text-lg font-bold text-[#1F2A14] mt-auto">
-            {product.price}
-          </span>
+          {/* Price - animated when changing */}
+          <motion.span
+            key={displayPrice}
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-lg font-bold text-[#1F2A14] mt-auto mb-3"
+          >
+            {displayPrice}
+          </motion.span>
+
+          {/* Variant selector buttons UNDER PRICE - only show if variants exist */}
+          {product.variants && product.variants.length > 1 && (
+            <div className="flex flex-wrap gap-2 justify-center mt-2">
+              {product.variants.map((variant, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => handleVariantClick(e, index)}
+                  className={`
+                    px-3 py-1.5 text-xs font-bold rounded-lg border-2 transition-all duration-200
+                    ${
+                      selectedVariantIndex === index
+                        ? "bg-[#3A4A22] text-[#F4FFD9] border-[#3A4A22] shadow-md"
+                        : "bg-white text-[#1F2A14] border-[#1F2A14]/20 hover:border-[#3A4A22] hover:bg-[#F6F5EE]"
+                    }
+                  `}
+                >
+                  {variant.size}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </Link>
 
-      {/* BUTTONY */}
+      {/* BUTTONS */}
       <div className="grid grid-cols-[1fr_60px] border-t border-[#1F2A14]/15 bg-white relative z-10">
         <Link
           href={`/sklep/${product.id}`}
@@ -102,8 +126,8 @@ export default function ProductCard({ product }: { product: Product }) {
         </Link>
 
         <button
-          className="flex items-center justify-center border-l border-[#1F2A14]/15 text-[#1F2A14] hover:bg-[#FFD966] transition-colors duration-300 z-20 cursor-pointer" // cursor-pointer
-          onClick={handleQuickAdd} // <--- PODPIĘTE SZYBKIE DODAWANIE
+          className="flex items-center justify-center border-l border-[#1F2A14]/15 text-[#1F2A14] hover:bg-[#FFD966] transition-colors duration-300 z-20 cursor-pointer"
+          onClick={handleQuickAdd}
         >
           <ShoppingBag size={18} strokeWidth={2} />
         </button>

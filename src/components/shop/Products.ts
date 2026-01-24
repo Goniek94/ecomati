@@ -1,8 +1,14 @@
+export interface ProductVariant {
+  size: string;
+  price: string;
+  priceNumeric: number; // For sorting/comparison
+}
+
 export interface Product {
   id: number;
   name: string;
   desc: string;
-  price: string;
+  price: string; // Default/base price
   displaySize?: string;
   variantCount?: number;
   image: string;
@@ -13,7 +19,8 @@ export interface Product {
   application?: string;
   ingredients?: string;
   details?: string;
-  sizes?: string[];
+  sizes?: string[]; // Legacy - kept for compatibility
+  variants?: ProductVariant[]; // New: variants with prices
 }
 
 const baseProducts: Product[] = [
@@ -21,7 +28,7 @@ const baseProducts: Product[] = [
   {
     id: 1,
     name: "Olej Lniany BIO",
-    desc: "250 ml · tłoczony na zimno",
+    desc: "tłoczony na zimno",
     price: "29,90 zł",
     image: "/Img/Olejbio.png",
     category: "olej-lniany",
@@ -33,7 +40,11 @@ const baseProducts: Product[] = [
       "Spożywać na zimno. Doskonały do sałatek, kasz, twarogu (pasta Budwigowa).",
     ingredients: "100% olej z nasion lnu brązowego.",
     details: "Pojemność: 250ml • Butelka: Ciemne szkło UV",
-    sizes: ["250 ml", "500 ml", "1000 ml"],
+    variants: [
+      { size: "250 ml", price: "29,90 zł", priceNumeric: 29.9 },
+      { size: "500 ml", price: "49,90 zł", priceNumeric: 49.9 },
+      { size: "1000 ml", price: "89,90 zł", priceNumeric: 89.9 },
+    ],
   },
   {
     id: 2,
