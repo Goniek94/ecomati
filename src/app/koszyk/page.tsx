@@ -32,6 +32,8 @@ export default function CartPage() {
   const [step, setStep] = useState(1); // 1: Checkout, 2: Sukces
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderNumber, setOrderNumber] = useState("");
 
   // Opcje dostawy
   const [deliveryMethod, setDeliveryMethod] = useState<"dpd" | "inpost">(
@@ -64,11 +66,70 @@ export default function CartPage() {
     metodaPlatnosci: "blik",
   });
 
-  const handleOrder = (e: React.FormEvent) => {
+  const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Zamówienie:", { cart, formData, deliveryMethod, finalPrice });
-    clearCart();
-    setStep(2);
+    setIsSubmitting(true);
+
+    try {
+      // Prepare order data
+      const orderData = {
+        customerEmail: formData.email,
+        customerName: `${formData.imie} ${formData.nazwisko}`,
+        customerPhone: formData.telefon,
+        shippingAddress: {
+          street: formData.ulica,
+          apartment: null,
+          city: formData.miasto,
+          postalCode: formData.kod,
+        },
+        cart: cart.map((item) => ({
+          id: item.id,
+          name: item.name,
+          image: item.image,
+          price: item.price.replace(" zł", "").replace(",", "."),
+          quantity: item.quantity,
+          selectedSize: item.selectedSize,
+        })),
+        deliveryMethod:
+          deliveryMethod === "inpost" ? "Paczkomat InPost" : "Kurier DPD",
+        deliveryCost,
+        totalPrice: finalPrice,
+        paymentMethod: formData.metodaPlatnosci,
+        invoiceData: wantInvoice
+          ? {
+              nip: formData.nip,
+              company: formData.firma,
+            }
+          : null,
+      };
+
+      // Send order to API
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Błąd podczas składania zamówienia");
+      }
+
+      // Success - save order number and clear cart
+      setOrderNumber(result.order.orderNumber);
+      clearCart();
+      setStep(2);
+    } catch (error) {
+      console.error("Error submitting order:", error);
+      alert(
+        "Wystąpił błąd podczas składania zamówienia. Spróbuj ponownie później.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // --- EKRAN SUKCESU ---
@@ -82,6 +143,12 @@ export default function CartPage() {
           <h1 className="text-3xl font-serif text-[#1F2A14] mb-4">
             Dziękujemy!
           </h1>
+          {orderNumber && (
+            <p className="text-sm text-[#6B705C] mb-2">
+              Numer zamówienia:{" "}
+              <span className="font-bold text-[#1F2A14]">{orderNumber}</span>
+            </p>
+          )}
           <p className="text-[#6B705C] mb-8">
             Twoje zamówienie zostało przyjęte. <br />
             Szczegóły wysłaliśmy na email.
@@ -422,12 +489,18 @@ export default function CartPage() {
                 </div>
 
                 {/* GŁÓWNY PRZYCISK */}
-                <button className="w-full bg-[#1F2A14] text-[#F6F5EE] py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-[#3A4A22] transition-all flex items-center justify-center gap-2 group shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer">
-                  Zamawiam i płacę
-                  <ArrowRight
-                    size={18}
-                    className="group-hover:translate-x-1 transition-transform"
-                  />
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#1F2A14] text-[#F6F5EE] py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-[#3A4A22] transition-all flex items-center justify-center gap-2 group shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#1F2A14] disabled:hover:shadow-lg disabled:hover:translate-y-0"
+                >
+                  {isSubmitting ? "Przetwarzanie..." : "Zamawiam i płacę"}
+                  {!isSubmitting && (
+                    <ArrowRight
+                      size={18}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
+                  )}
                 </button>
 
                 {/* NOWY PRZYCISK: WRÓĆ DO SKLEPU */}
