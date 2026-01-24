@@ -12,7 +12,7 @@ export default function Footer() {
         {/* --- GÓRNA CZĘŚĆ (GRID) --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-20 mb-20">
           {/* KOLUMNA 1: MARKA */}
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <Link
               href="/"
               className="text-xl font-bold tracking-[0.2em] mb-8 block"
@@ -31,11 +31,11 @@ export default function Footer() {
           </div>
 
           {/* KOLUMNA 2: SKLEP */}
-          <div>
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <h4 className="text-xs font-bold uppercase tracking-[0.25em] text-[#FFD966] mb-8">
               Sklep
             </h4>
-            <ul className="flex flex-col gap-4 text-sm text-[#F6F5EE]/80">
+            <ul className="flex flex-col gap-4 text-sm text-[#F6F5EE]/80 items-center md:items-start">
               <FooterLink href="/sklep">Wszystkie produkty</FooterLink>
               <FooterLink href="/sklep?cat=oleje">Oleje Tłoczone</FooterLink>
               <FooterLink href="/sklep?cat=ziarna">Ziarna i Pestki</FooterLink>
@@ -49,11 +49,11 @@ export default function Footer() {
           </div>
 
           {/* KOLUMNA 3: POMOC */}
-          <div>
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <h4 className="text-xs font-bold uppercase tracking-[0.25em] text-[#FFD966] mb-8">
               Obsługa Klienta
             </h4>
-            <ul className="flex flex-col gap-4 text-sm text-[#F6F5EE]/80">
+            <ul className="flex flex-col gap-4 text-sm text-[#F6F5EE]/80 items-center md:items-start">
               <FooterLink href="/kontakt">Kontakt</FooterLink>
               <FooterLink href="/dostawa">Dostawa i Płatności</FooterLink>
               <FooterLink href="/zwroty">Zwroty i Reklamacje</FooterLink>
@@ -63,15 +63,15 @@ export default function Footer() {
           </div>
 
           {/* KOLUMNA 4: NEWSLETTER */}
-          <div>
+          <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <h4 className="text-xs font-bold uppercase tracking-[0.25em] text-[#FFD966] mb-8">
               Newsletter
             </h4>
-            <p className="text-[#F6F5EE]/60 text-sm mb-6">
+            <p className="text-[#F6F5EE]/60 text-sm mb-6 max-w-xs md:max-w-none">
               Zapisz się, aby otrzymywać informacje o nowościach i kodach
               rabatowych.
             </p>
-            <form className="flex flex-col gap-3">
+            <form className="flex flex-col gap-3 w-full max-w-xs md:max-w-none">
               <input
                 type="email"
                 placeholder="Twój email"
@@ -85,7 +85,7 @@ export default function Footer() {
         </div>
 
         {/* --- DOLNA CZĘŚĆ (COPYRIGHT) --- */}
-        <div className="pt-8 border-t border-[#F6F5EE]/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#F6F5EE]/40">
+        <div className="pt-8 border-t border-[#F6F5EE]/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#F6F5EE]/40 text-center md:text-left">
           <p>&copy; {currentYear} Ecomati. Wszystkie prawa zastrzeżone.</p>
 
           <div className="flex gap-8">

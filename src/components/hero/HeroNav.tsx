@@ -3,23 +3,30 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCart } from "@/context/CartContext"; // <--- IMPORT
+import { useCart } from "@/context/CartContext";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { createPortal } from "react-dom"; // <--- 1. IMPORT PORTALU
 
 interface HeroNavProps {
   variant?: "light" | "dark";
 }
 
 export default function HeroNav({ variant = "light" }: HeroNavProps) {
-  const { cartCount } = useCart(); // <--- POBIERAMY LICZNIK
+  const { cartCount } = useCart();
 
   const [time, setTime] = useState("");
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false); // <--- 2. STAN MONTOWANIA
   const pathname = usePathname();
 
   const isHomePage = pathname === "/";
+
+  // Ustawienie flagi mounted po stronie klienta
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!isHomePage) {
@@ -101,187 +108,196 @@ export default function HeroNav({ variant = "light" }: HeroNavProps) {
     : "py-8 bg-transparent";
 
   return (
-    <nav
-      className={`
-        fixed top-0 left-0 right-0 z-[100]
-        transition-all duration-500 ease-in-out
-        ${containerClasses}
-        ${textColor}
-      `}
-    >
-      <div className="relative w-full h-full min-h-[30px]">
-        {/* LOGO */}
-        <Link
-          href="/"
-          className={`
-            absolute left-6 md:left-10 top-1/2 -translate-y-1/2
-            text-xs tracking-[0.35em] font-semibold
-            ${hoverColor} transition-colors
-          `}
-        >
-          ECOMATI
-        </Link>
-
-        {/* MENU ŚRODKOWE */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex gap-10 lg:gap-14 text-sm tracking-widest">
+    <>
+      <nav
+        className={`
+          fixed top-0 left-0 right-0 z-[100]
+          transition-all duration-500 ease-in-out
+          ${containerClasses}
+          ${textColor}
+        `}
+      >
+        <div className="relative w-full h-full min-h-[30px]">
+          {/* LOGO */}
           <Link
             href="/"
-            className={`transition-colors ${pathname === "/" ? activeColor : ""} ${hoverColor}`}
+            className={`
+              absolute left-6 md:left-10 top-1/2 -translate-y-1/2
+              text-xs tracking-[0.35em] font-semibold
+              ${hoverColor} transition-colors
+            `}
           >
-            HOME
+            ECOMATI
           </Link>
 
-          <Link
-            href="/sklep"
-            className={`transition-colors font-semibold ${pathname.startsWith("/sklep") ? activeColor : ""} ${hoverColor}`}
-          >
-            SKLEP
-          </Link>
+          {/* MENU ŚRODKOWE */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex gap-10 lg:gap-14 text-sm tracking-widest">
+            <Link
+              href="/"
+              className={`transition-colors ${pathname === "/" ? activeColor : ""} ${hoverColor}`}
+            >
+              HOME
+            </Link>
 
-          <Link href="/#about" className={`transition-colors ${hoverColor}`}>
-            POZNAJ NAS
-          </Link>
+            <Link
+              href="/sklep"
+              className={`transition-colors font-semibold ${pathname.startsWith("/sklep") ? activeColor : ""} ${hoverColor}`}
+            >
+              SKLEP
+            </Link>
 
-          <Link href="/#contact" className={`transition-colors ${hoverColor}`}>
-            KONTAKT
-          </Link>
-        </div>
+            <Link href="/#about" className={`transition-colors ${hoverColor}`}>
+              POZNAJ NAS
+            </Link>
 
-        {/* PRAWA STRONA - HAMBURGER + KOSZYK */}
-        <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 flex items-center gap-4 md:gap-6 text-xs tracking-widest z-[110]">
-          <span
-            className="hidden sm:block opacity-80 font-mono"
-            suppressHydrationWarning
-          >
-            {time}
-          </span>
+            <Link
+              href="/#contact"
+              className={`transition-colors ${hoverColor}`}
+            >
+              KONTAKT
+            </Link>
+          </div>
 
-          {/* HAMBURGER MENU - tylko na mobile */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`md:hidden p-2 ${hoverColor} transition-colors relative z-[110]`}
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
-
-          <Link
-            href="/koszyk"
-            className="relative text-lg hover:opacity-100 transition-opacity"
-          >
-            🛒
-            {/* BADGE Z LICZNIKIEM */}
+          {/* PRAWA STRONA - HAMBURGER + KOSZYK */}
+          <div className="absolute right-6 md:right-10 top-1/2 -translate-y-1/2 flex items-center gap-4 md:gap-6 text-xs tracking-widest z-[110]">
             <span
-              className={`
-                absolute -top-2 -right-3
-                text-[10px] rounded-full px-1.5 font-bold min-w-[18px] text-center
-                ${cartBadge}
-                transition-colors duration-300
-              `}
+              className="hidden sm:block opacity-80 font-mono"
+              suppressHydrationWarning
             >
-              {cartCount}
+              {time}
             </span>
-          </Link>
-        </div>
-      </div>
 
-      {/* MOBILE MENU OVERLAY */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
-
-            {/* Menu Panel */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed inset-0 bg-[#1F2A14] z-[9999] overflow-y-auto"
+            {/* HAMBURGER MENU - tylko na mobile */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className={`md:hidden p-2 ${hoverColor} transition-colors relative z-[110]`}
+              aria-label="Toggle menu"
             >
-              <div className="flex flex-col h-full">
-                {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-[#F4FFD9]/20">
-                  <span className="text-[#F4FFD9] text-sm tracking-[0.35em] font-semibold">
-                    MENU
-                  </span>
-                  <button
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 text-[#F4FFD9] hover:text-[#FFD966] transition-colors"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
 
-                {/* Navigation Links */}
-                <nav className="flex-1 p-8">
-                  <div className="space-y-3">
-                    <Link
-                      href="/"
-                      className={`block py-5 px-6 text-base font-light tracking-[0.2em] uppercase rounded-xl transition-all ${
-                        pathname === "/"
-                          ? "bg-[#FFD966] text-[#1F2A14] font-semibold"
-                          : "text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8"
-                      }`}
-                    >
-                      Home
-                    </Link>
+            <Link
+              href="/koszyk"
+              className="relative text-lg hover:opacity-100 transition-opacity"
+            >
+              🛒
+              {/* BADGE Z LICZNIKIEM */}
+              <span
+                className={`
+                  absolute -top-2 -right-3
+                  text-[10px] rounded-full px-1.5 font-bold min-w-[18px] text-center
+                  ${cartBadge}
+                  transition-colors duration-300
+                `}
+              >
+                {cartCount}
+              </span>
+            </Link>
+          </div>
+        </div>
+      </nav>
 
-                    <Link
-                      href="/sklep"
-                      className={`block py-5 px-6 text-base font-light tracking-[0.2em] uppercase rounded-xl transition-all ${
-                        pathname.startsWith("/sklep")
-                          ? "bg-[#FFD966] text-[#1F2A14] font-semibold"
-                          : "text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8"
-                      }`}
-                    >
-                      Sklep
-                    </Link>
+      {/* MOBILE MENU PORTAL - TO JEST KLUCZOWA ZMIANA */}
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {isMobileMenuOpen && (
+              <>
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                />
 
-                    <Link
-                      href="/#about"
-                      className="block py-5 px-6 text-base font-light tracking-[0.2em] uppercase text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8 rounded-xl transition-all"
-                    >
-                      Poznaj Nas
-                    </Link>
+                {/* Menu Panel */}
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                  className="fixed inset-0 bg-[#1F2A14] z-[9999] overflow-y-auto"
+                >
+                  <div className="flex flex-col h-full">
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-6 border-b border-[#F4FFD9]/20">
+                      <span className="text-[#F4FFD9] text-sm tracking-[0.35em] font-semibold">
+                        MENU
+                      </span>
+                      <button
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="p-2 text-[#F4FFD9] hover:text-[#FFD966] transition-colors"
+                      >
+                        <X className="w-6 h-6" />
+                      </button>
+                    </div>
 
-                    <Link
-                      href="/#contact"
-                      className="block py-5 px-6 text-base font-light tracking-[0.2em] uppercase text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8 rounded-xl transition-all"
-                    >
-                      Kontakt
-                    </Link>
+                    {/* Navigation Links */}
+                    <nav className="flex-1 p-8">
+                      <div className="space-y-3">
+                        <Link
+                          href="/"
+                          className={`block py-5 px-6 text-base font-light tracking-[0.2em] uppercase rounded-xl transition-all ${
+                            pathname === "/"
+                              ? "bg-[#FFD966] text-[#1F2A14] font-semibold"
+                              : "text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8"
+                          }`}
+                        >
+                          Home
+                        </Link>
+
+                        <Link
+                          href="/sklep"
+                          className={`block py-5 px-6 text-base font-light tracking-[0.2em] uppercase rounded-xl transition-all ${
+                            pathname.startsWith("/sklep")
+                              ? "bg-[#FFD966] text-[#1F2A14] font-semibold"
+                              : "text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8"
+                          }`}
+                        >
+                          Sklep
+                        </Link>
+
+                        <Link
+                          href="/#about"
+                          className="block py-5 px-6 text-base font-light tracking-[0.2em] uppercase text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8 rounded-xl transition-all"
+                        >
+                          Poznaj Nas
+                        </Link>
+
+                        <Link
+                          href="/#contact"
+                          className="block py-5 px-6 text-base font-light tracking-[0.2em] uppercase text-[#F4FFD9] hover:bg-[#F4FFD9]/10 hover:text-[#FFD966] hover:pl-8 rounded-xl transition-all"
+                        >
+                          Kontakt
+                        </Link>
+                      </div>
+                    </nav>
+
+                    {/* Footer */}
+                    <div className="p-8 border-t border-[#F4FFD9]/20">
+                      <div className="text-center">
+                        <p className="text-[#F4FFD9]/80 text-sm tracking-[0.3em] mb-3 font-light">
+                          ECOMATI
+                        </p>
+                        <p className="text-[#F4FFD9]/50 text-xs font-light italic">
+                          Naturalna selekcja
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </nav>
-
-                {/* Footer */}
-                <div className="p-8 border-t border-[#F4FFD9]/20">
-                  <div className="text-center">
-                    <p className="text-[#F4FFD9]/80 text-sm tracking-[0.3em] mb-3 font-light">
-                      ECOMATI
-                    </p>
-                    <p className="text-[#F4FFD9]/50 text-xs font-light italic">
-                      Naturalna selekcja
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body, // Portal renderuje menu bezpośrednio w body
         )}
-      </AnimatePresence>
-    </nav>
+    </>
   );
 }

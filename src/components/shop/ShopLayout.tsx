@@ -6,6 +6,7 @@ import ShopHeader from "./ShopHeader";
 import ShopFilters from "./ShopFilters";
 import ProductGrid from "./ProductGrid";
 import Footer from "@/components/layout/Footer";
+import { products } from "@/components/shop/Products"; // <--- 1. DODANY IMPORT
 
 export default function ShopLayout() {
   const [category, setCategory] = useState("all");
@@ -24,6 +25,7 @@ export default function ShopLayout() {
           <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-16 mt-24">
             <aside>
               <ShopFilters
+                products={products} // <--- 2. PRZEKAZANIE PRODUKTÓW (To naprawia błąd)
                 activeCategory={category}
                 setCategory={setCategory}
                 searchQuery={searchQuery}
