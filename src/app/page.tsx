@@ -5,7 +5,6 @@ import AboutSection from "@/components/sections/AboutSection";
 import ContactSection from "@/components/sections/ContactSection";
 import Footer from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
-import { Product } from "@prisma/client";
 
 async function getFeaturedProducts() {
   try {
@@ -20,7 +19,7 @@ async function getFeaturedProducts() {
       },
     });
 
-    return products.map((p: Product) => {
+    return products.map((p: any) => {
       const weightOptions = p.weightOptions as any;
       const hasVariants =
         weightOptions?.variants && weightOptions.variants.length > 0;
