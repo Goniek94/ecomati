@@ -26,7 +26,12 @@ interface Product {
   properties?: string[];
   details?: string;
   sizes?: string[];
-  variants?: Array<{ size: string; stock: number; price: number }>;
+  variants?: Array<{
+    size: string;
+    stock: number;
+    price: string;
+    priceNumeric: number;
+  }>;
 }
 
 interface ProductDetailClientProps {
