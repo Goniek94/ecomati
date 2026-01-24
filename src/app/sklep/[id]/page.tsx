@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { Product } from "@prisma/client";
 import ProductDetailClient from "./ProductDetailClient";
 
 async function getProduct(id: string) {
@@ -54,7 +55,7 @@ async function getRelatedProducts(category: string, currentId: number) {
       take: 4,
     });
 
-    return products.map((p) => ({
+    return products.map((p: Product) => ({
       id: Number(p.id),
       name: p.name,
       desc: p.shortDescription || "",
